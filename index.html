@@ -7,84 +7,109 @@
     <link rel="stylesheet" href="calculator.css">
 </head>
 <body>
-    <div id="calculator">
-     <input type="text" id="display" readonly>
-        <div class="button-container">
-            <button class="button" onclick="
-             currentDisplay = '';
-             document.querySelector('#display').value = currentDisplay;
-            ">c</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '1';
-           document.querySelector('#display').value = currentDisplay;"
-           >1</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '2';
-           document.querySelector('#display').value = currentDisplay;"
-           >2</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '+';
-           document.querySelector('#display').value = currentDisplay;"
-           >+</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '3';
-           document.querySelector('#display').value = currentDisplay;"
-           >3</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '4';
-           document.querySelector('#display').value = currentDisplay;"
-           >4</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '-';
-           document.querySelector('#display').value = currentDisplay;"
-           >-</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '5';
-           document.querySelector('#display').value = currentDisplay;"
-           >5</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '6';
-           document.querySelector('#display').value = currentDisplay;"
-           >6</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '*';
-           document.querySelector('#display').value = currentDisplay;"
-           >*</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '7';
-           document.querySelector('#display').value = currentDisplay;"
-           >7</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '8';
-           document.querySelector('#display').value = currentDisplay;"
-           >8</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '/';
-           document.querySelector('#display').value = currentDisplay;"
-           >/</button>
-           <button class="button" id="evalute_button" onclick="
-           currentDisplay = eval(currentDisplay);
-           document.querySelector('#display').value = currentDisplay;
-           ">=</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '9';
-           document.querySelector('#display').value = currentDisplay;"
-           >9</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '0';
-           document.querySelector('#display').value = currentDisplay;"
-           >0</button>
-           <button class="button" onclick="
-           currentDisplay = currentDisplay + '.';
-           document.querySelector('#display').value = currentDisplay;"
-           >.</button>
-           
+    <div id="main-container">
+      <div id="calculator-card">
+        <h2 id="calc-title">Advanced Calculator</h2>
+        <div id="calculator">
+          <input type="text" id="display" readonly>
+          <div class="sci-button-row">
+            <button class="button" data-value="sin">sin</button>
+            <button class="button" data-value="cos">cos</button>
+            <button class="button" data-value="tan">tan</button>
+            <button class="button" data-value="log">log</button>
+            <button class="button" data-value="sqrt">√</button>
+            <button class="button" data-value="^">^</button>
+          </div>
+          <div class="button-container">
+            <button class="button" data-value="C">C</button>
+            <button class="button" data-value="(">(</button>
+            <button class="button" data-value=")">)</button>
+            <button class="button" data-value="/">/</button>
+            <button class="button" data-value="7">7</button>
+            <button class="button" data-value="8">8</button>
+            <button class="button" data-value="9">9</button>
+            <button class="button" data-value="*">*</button>
+            <button class="button" data-value="4">4</button>
+            <button class="button" data-value="5">5</button>
+            <button class="button" data-value="6">6</button>
+            <button class="button" data-value="-">-</button>
+            <button class="button" data-value="1">1</button>
+            <button class="button" data-value="2">2</button>
+            <button class="button" data-value="3">3</button>
+            <button class="button" data-value="+">+</button>
+            <button class="button" data-value="0">0</button>
+            <button class="button" data-value=".">.</button>
+            <button class="button" data-value="=">=</button>
+          </div>
+          <button class="button" id="toggle-history-btn" style="margin-top: 16px; width: 100%;">History</button>
         </div>
+      </div>
+      <div id="history-panel" style="display: none;">
+        <h3>History</h3>
+        <ul id="history"></ul>
+      </div>
     </div>
     <script>
         let currentDisplay = '';
-        document.querySelector('#display').value = 
-        currentDisplay;
+        let history = [];
+        const display = document.querySelector('#display');
+        const historyList = document.querySelector('#history');
+        const historyPanel = document.getElementById('history-panel');
+        const toggleHistoryBtn = document.getElementById('toggle-history-btn');
+        
+        function updateDisplay() {
+            display.value = currentDisplay;
+        }
+        function updateHistory() {
+            historyList.innerHTML = '';
+            history.slice(-10).reverse().forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                historyList.appendChild(li);
+            });
+        }
+        function handleButton(value) {
+            if (value === 'C') {
+                currentDisplay = '';
+            } else if (value === '=') {
+                try {
+                    let expr = currentDisplay
+                        .replace(/sin\(/g, 'Math.sin(')
+                        .replace(/cos\(/g, 'Math.cos(')
+                        .replace(/tan\(/g, 'Math.tan(')
+                        .replace(/log\(/g, 'Math.log10(')
+                        .replace(/sqrt\(/g, 'Math.sqrt(')
+                        .replace(/\^/g, '**');
+                    let result = eval(expr);
+                    history.push(currentDisplay + ' = ' + result);
+                    currentDisplay = result.toString();
+                    updateHistory();
+                } catch {
+                    currentDisplay = 'Error';
+                }
+            } else if (["sin", "cos", "tan", "log", "sqrt"].includes(value)) {
+                currentDisplay += value + '(';
+            } else {
+                currentDisplay += value;
+            }
+            updateDisplay();
+        }
+        document.querySelectorAll('.button').forEach(btn => {
+            if (btn.id !== 'toggle-history-btn') {
+                btn.addEventListener('click', e => {
+                    handleButton(btn.getAttribute('data-value'));
+                });
+            }
+        });
+        toggleHistoryBtn.addEventListener('click', () => {
+            if (historyPanel.style.display === 'none') {
+                historyPanel.style.display = 'flex';
+            } else {
+                historyPanel.style.display = 'none';
+            }
+        });
+        updateDisplay();
+        updateHistory();
     </script>
 </body>
 </html>
